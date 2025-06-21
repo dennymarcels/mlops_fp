@@ -16,17 +16,21 @@ def fetch_data() -> pd.DataFrame:
     """
     logger.info("Fetching data...")
     dataset = load_breast_cancer()
+    
+    # Features columns
     data = pd.DataFrame(data=dataset.data, columns=dataset.feature_names)
     
-    # Randomly set 5 values to NaN
-    rng = np.random.default_rng(seed=42)
-    n_rows, n_cols = data.shape
-    rows = rng.choice(n_rows, size=5, replace=True)
-    cols = rng.choice(n_cols, size=5, replace=True)
-    for row, col in zip(rows, cols):
-        data.iat[row, col] = np.nan
+    # Introduce random NaN values
+    np.random.seed(42)
+    for col in data.columns:
+        mask = np.random.random(len(data)) < 0.05  # 5% chance of NaN
+        data.loc[mask, col] = np.nan
     
+    # Target column
     data["target"] = dataset.target
+
+    # Shuffle the dataset
+    data = data.sample(frac=1).reset_index(drop=True)
     
     return data
 
